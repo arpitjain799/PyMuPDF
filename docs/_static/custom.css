@@ -1,8 +1,11 @@
 /* icon sizing in the left menu */
-.icon-home {
+/*.icon-home {
     width: 100px;
     height: auto;
 }
+*/
+
+
 
 /* main document page: ensures pages fit to the available width and height */
 .wy-nav-content {
@@ -93,8 +96,7 @@ cite {
 /* Dark mode colors */
 @media (prefers-color-scheme: dark) {
 
-    /* main document page */
-    .wy-nav-content {
+    /*.wy-nav-content {
         background-color: #000;
         color: #fff;
     }
@@ -121,7 +123,7 @@ cite {
 
     .admonition {
         color: #000;
-    }
+    }*/
 
     .discordLink a {
         color: #fff;

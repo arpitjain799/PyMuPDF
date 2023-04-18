@@ -23,7 +23,7 @@ Within `docs` update the associated restructured text (`.rst`) files. These file
 
 - From the "docs" location run:
 
-`sphinx-build -b html . build/html`
+`sphinx-build -a -b html . build/html`
 
 This then creates the HTML documentation within `build/html`. 
 
