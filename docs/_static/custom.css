@@ -43,9 +43,7 @@
     font-size: 13px;
 }
 
-.discordLink a {
-    color: #000;
-}
+
 
 .discordLink img {
     width: 30px;
@@ -71,6 +69,7 @@ h1 {
     background-color: #007aff;
     color: #fff;
     border-radius: 5px;
+    margin-top: 20px;
     margin-left: -10px;
 }
 
@@ -92,41 +91,67 @@ cite {
 }
 
 
+/*** Fumo theme overrides ***/
+
+.bottom-of-page .left-details {
+    display: none;
+}
+
+.bottom-of-page .right-details:after {
+    content: "© Copyright 2023, Artifex";
+}
+
+.sidebar-brand-text {
+    font-size: 13px;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-logo {
+    width: 60px;
+    height: 60px;
+}
+
+.sidebar-container {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-container .sidebar-search-container {
+    display: none;
+}
+
+
+.sidebar-search-container.top {
+    position:sticky;
+    top:10px;
+    border-radius: 20px;
+
+    border: solid #333 1px;
+
+    background-color: #fff;
+}
+
+.sidebar-search-container.top .sidebar-search {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+}
+
+
+:target>h1:first-of-type, :target>h2:first-of-type, :target>h3:first-of-type,
+:target>h4:first-of-type, :target>h5:first-of-type, :target>h6:first-of-type,
+span:target~h1:first-of-type, span:target~h2:first-of-type, span:target~h3:first-of-type,
+span:target~h4:first-of-type, span:target~h5:first-of-type, span:target~h6:first-of-type {
+    background-color: transparent !important;
+    padding-top: 40px; /* accomodates header search blocking target */
+    margin-top: -40px;
+    text-decoration: underline;
+}
+
 
 /* Dark mode colors */
 @media (prefers-color-scheme: dark) {
 
-    /*.wy-nav-content {
-        background-color: #000;
-        color: #fff;
-    }
 
-    .htmltag {
-        color: #000;
-    }
-
-    th {
-        color: #fff;
-    }
-
-    td {
-        background-color: #000 !important;
-    }
-
-    tr:nth-child(2n-1) td{
-        background-color: #333 !important;
-    }
-
-    pre {
-        color: #000;
-    }
-
-    .admonition {
-        color: #000;
-    }*/
-
-    .discordLink a {
-        color: #fff;
-    }
 
 }
