@@ -39,6 +39,10 @@ The following table illustrates how :title:`PyMuPDF` compares with other typical
 
     <style>
 
+        table {
+            border-style: hidden;
+        }
+
         #feature-matrix {
             width: 100%;
             border: 1px #999 solid;
@@ -136,7 +140,7 @@ The following table illustrates how :title:`PyMuPDF` compares with other typical
 
     </style>
 
-    <table id="feature-matrix">
+    <table id="feature-matrix" border="0" cellpadding="0" cellspacing="0">
         <tr>
             <th style="width:20%;">Feature</th>
             <th style="width:20%;">PyMuPDF</th>

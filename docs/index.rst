@@ -6,10 +6,10 @@
 Welcome to :title:`PyMuPDF`
 ================================
 
-.. image:: images/pymupdf-logo.png
-   :align: left
-   :scale: 10%
-
+..
+   .. image:: images/pymupdf-logo.png
+      :align: left
+      :scale: 10%
 
 
 :title:`PyMuPDF` is an enhanced :title:`Python` binding for `MuPDF <https://www.mupdf.com/>`_ --  a lightweight :title:`PDF`, :title:`XPS`, and :title:`E-book` viewer, renderer, and toolkit, which is maintained and developed by :title:`Artifex Software, Inc`.

@@ -43,8 +43,6 @@
     font-size: 13px;
 }
 
-
-
 .discordLink img {
     width: 30px;
     height: 30px;
@@ -65,12 +63,12 @@
 }
 
 h1 {
-    padding: 10px;
-    background-color: #007aff;
-    color: #fff;
-    border-radius: 5px;
-    margin-top: 20px;
-    margin-left: -10px;
+    padding: 10px !important;
+    background-color: #007aff !important;
+    color: #fff !important;
+    border-radius: 5px !important;
+    margin-top: 20px !important;
+    margin-left: -10px !important;
 }
 
 cite {
@@ -88,6 +86,34 @@ cite {
 
 .green-color {
     color: #00cc00;
+}
+
+button.cta {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border:0;
+    text-transform:uppercase;
+    border-radius:5px;
+    font-size:16px;
+    font-weight:500;
+    min-height:40px;
+    line-height:40px;
+    padding: 0 15px;
+    color:#fff;
+    cursor:pointer;
+}
+
+button.cta.orange {
+    width:auto;
+    background-image: linear-gradient(to right, #ea5842, #ec6343, #ed6d45, #ef7747, #f0804a) !important;
+}
+
+button.cta.orange:hover {
+    background:#ea5842 !important;
+}
+
+button.cta a {
+    color:#fff !important;
 }
 
 
@@ -138,9 +164,17 @@ cite {
 }
 
 
-:target>h1:first-of-type, :target>h2:first-of-type, :target>h3:first-of-type,
+:target>h1:first-of-type, span:target~h1:first-of-type {
+    background-color: #007aff !important;
+    color: #fff !important;
+    padding-top: 40px; /* accomodates header search blocking target */
+    margin-top: -40px;
+}
+
+
+:target>h2:first-of-type, :target>h3:first-of-type,
 :target>h4:first-of-type, :target>h5:first-of-type, :target>h6:first-of-type,
-span:target~h1:first-of-type, span:target~h2:first-of-type, span:target~h3:first-of-type,
+span:target~h2:first-of-type, span:target~h3:first-of-type,
 span:target~h4:first-of-type, span:target~h5:first-of-type, span:target~h6:first-of-type {
     background-color: transparent !important;
     padding-top: 40px; /* accomodates header search blocking target */
