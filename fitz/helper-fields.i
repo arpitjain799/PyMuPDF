@@ -471,10 +471,10 @@ void JM_get_widget_properties(fz_context *ctx, pdf_annot *annot, PyObject *Widge
         SETATTR_DROP(Widget, "field_type_string",
                 JM_UnicodeFromStr(JM_field_type_text(field_type)));
 
-        #if FZ_VERSION_MAJOR == 1 && FZ_VERSION_MINOR <= 22
+        #if FZ_VERSION_MAJOR == 1 && FZ_VERSION_MINOR < 22
             char *field_name = pdf_field_name(ctx, annot_obj);
         #else
-            char *field_name = pdf_load_field_name(ctx, annot_obj);
+        char *field_name = pdf_load_field_name(ctx, annot_obj);
         #endif
         SETATTR_DROP(Widget, "field_name", JM_UnicodeFromStr(field_name));
         JM_Free(field_name);
@@ -484,8 +484,17 @@ void JM_get_widget_properties(fz_context *ctx, pdf_annot *annot, PyObject *Widge
         if (obj) label = pdf_to_text_string(ctx, obj);
         SETATTR_DROP(Widget, "field_label", JM_UnicodeFromStr(label));
 
-        SETATTR_DROP(Widget, "field_value",
-                JM_UnicodeFromStr(pdf_field_value(ctx, annot_obj)));
+        const char *fvalue = NULL;
+        if (field_type == PDF_WIDGET_TYPE_RADIOBUTTON) {
+            obj = pdf_dict_get(ctx, annot_obj, PDF_NAME(AS));
+            if (obj) {
+                fvalue = pdf_to_name(ctx, obj);
+            }
+        }
+        if (!fvalue) {
+            fvalue = pdf_field_value(ctx, annot_obj);
+        }
+        SETATTR_DROP(Widget, "field_value", JM_UnicodeFromStr(fvalue));
 
         SETATTR_DROP(Widget, "field_display",
                 Py_BuildValue("i", pdf_field_display(ctx, annot_obj)));
@@ -668,10 +677,10 @@ void JM_set_widget_properties(fz_context *ctx, pdf_annot *annot, PyObject *Widge
     value = GETATTR("field_name");
     if (value != Py_None) {
         char *name = JM_StrAsChar(value);
-        #if FZ_VERSION_MAJOR == 1 && FZ_VERSION_MINOR <= 22
+        #if FZ_VERSION_MAJOR == 1 && FZ_VERSION_MINOR < 22
             char *old_name = pdf_field_name(ctx, annot_obj);
         #else
-            char *old_name = pdf_load_field_name(ctx, annot_obj);
+        char *old_name = pdf_load_field_name(ctx, annot_obj);
         #endif
         if (strcmp(name, old_name) != 0) {
             pdf_dict_put_text_string(ctx, annot_obj, PDF_NAME(T), name);
@@ -782,8 +791,26 @@ void JM_set_widget_properties(fz_context *ctx, pdf_annot *annot, PyObject *Widge
     char *text = NULL;
     switch(field_type)
     {
-    case PDF_WIDGET_TYPE_CHECKBOX:
     case PDF_WIDGET_TYPE_RADIOBUTTON:
+
+        if (PyObject_RichCompareBool(value, Py_False, Py_EQ)) {
+            pdf_set_field_value(ctx, pdf, annot_obj, "Off", 1);
+            pdf_dict_put_name(gctx, annot_obj, PDF_NAME(AS), "Off");
+        } else {
+            text = JM_StrAsChar(value);
+            // TODO check if another button in the group is ON and if so set it Off
+            pdf_obj *onstate = pdf_button_field_on_state(ctx, annot_obj);
+            if (onstate) {
+                const char *on = pdf_to_name(ctx, onstate);
+                pdf_set_field_value(ctx, pdf, annot_obj, on, 1);
+                pdf_dict_put_name(gctx, annot_obj, PDF_NAME(AS), on);
+            } else  if (text) {
+                pdf_dict_put_name(gctx, annot_obj, PDF_NAME(AS), text);
+            }
+            
+        }
+        break;
+    case PDF_WIDGET_TYPE_CHECKBOX:
         if (PyObject_RichCompareBool(value, Py_True, Py_EQ)) {
             pdf_obj *onstate = pdf_button_field_on_state(ctx, annot_obj);
             const char *on = pdf_to_name(ctx, onstate);
@@ -971,6 +998,22 @@ class Widget(object):
         """
         if self.field_type not in range(1, 8):
             raise ValueError("bad field type")
+        doc = self.parent.parent
+
+        # if setting on a radio button, first set Off all other buttons
+        # in the group - this is not done by MuPDF:
+        if self.field_type == PDF_WIDGET_TYPE_RADIOBUTTON and self.field_value not in (False, "Off"):
+            # so we are about setting this button to ON/True
+            # check other buttons in same group and set them to 'Off'
+            kids_type, kids_value = doc.xref_get_key(self.xref, "Parent/Kids")
+            doc.xref_set_key(self.xref, "Parent/V", "(Off)")  # set off old value
+            if kids_type == "array":
+                xrefs = tuple(map(int, kids_value[1:-1].replace("0 R","").split()))
+                for xref in xrefs:
+                    if xref != self.xref:
+                        doc.xref_set_key(xref, "AS", "/Off")
+        # the calling method will now set the intended button to on and
+        # will find everything prepared for correct functioning.
 
 
     def update(self):
@@ -1010,7 +1053,7 @@ class Widget(object):
         state is usually called like this, the 'On' state is often given a name
         relating to the functional context.
         """
-        if self.field_type not in (1, 2, 3, 5):
+        if self.field_type not in (2, 5):
             return None  # no button type
         doc = self.parent.parent
         xref = self.xref
@@ -1033,6 +1076,24 @@ class Widget(object):
             states["down"] = dstates
         return states
 
+    def on_state(self):
+        """Return the "On" value for button widgets.
+        
+        This is useful for radio buttons mainly. Checkboxes will always return
+        True. Radio buttons will return the string that is unequal to "Off"
+        as returned by method button_states().
+        """
+        if self.field_type not in (2, 5):
+            return None  # no checkbox or radio button
+        if self.field_type == 2:
+            return True
+        bstate = self.button_states()
+        for k in bstate.keys():
+            for v in bstate[k]:
+                if v != "Off":
+                    return v
+        print("warning: radio button has no 'On' value.")
+        return True
 
     def reset(self):
         """Reset the field value to its default.
