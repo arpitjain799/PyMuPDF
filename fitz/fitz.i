@@ -4011,6 +4011,13 @@ if off:
     if s != set():
         raise ValueError("bad OCGs in 'off': %s" % s)
 
+if locked:
+    if type(locked) not in (list, tuple):
+        raise ValueError("bad type: 'locked'")
+    s = set(locked).difference(ocgs)
+    if s != set():
+        raise ValueError("bad OCGs in 'locked': %s" % s)
+
 if rbgroups:
     if type(rbgroups) not in (list, tuple):
         raise ValueError("bad type: 'rbgroups'")
@@ -4030,7 +4037,7 @@ if basestate:
 %}
         PyObject *
         set_layer(int config, const char *basestate=NULL, PyObject *on=NULL,
-                    PyObject *off=NULL, PyObject *rbgroups=NULL)
+                    PyObject *off=NULL, PyObject *rbgroups=NULL, PyObject *locked=NULL)
         {
             pdf_obj *obj = NULL;
             fz_try(gctx) {
@@ -4049,7 +4056,7 @@ if basestate:
                 if (!obj) {
                     RAISEPY(gctx, MSG_BAD_OC_CONFIG, PyExc_ValueError);
                 }
-                JM_set_ocg_arrays(gctx, obj, basestate, on, off, rbgroups);
+                JM_set_ocg_arrays(gctx, obj, basestate, on, off, rbgroups, locked);
                 pdf_read_ocg(gctx, pdf);
                 finished:;
             }
@@ -6268,10 +6275,8 @@ def get_oc_items(self) -> list:
             It also adds default items that are missing in original path types.
             """
             allkeys = (
-                    ("closePath", False), ("fill", None),
-                    ("color", None), ("width", 0), ("lineCap", [0]),
-                    ("lineJoin", 0), ("dashes", "[] 0"), ("stroke_opacity", 1),
-                    ("fill_opacity", 1), ("even_odd", True),
+                    "closePath", "fill", "color", "width", "lineCap",
+                    "lineJoin", "dashes", "stroke_opacity", "fill_opacity", "even_odd",
                 )
             val = self.get_cdrawings(extended=extended)
             for i in range(len(val)):
@@ -6294,9 +6299,9 @@ def get_oc_items(self) -> list:
                             item = tuple([cmd] + [Point(i) for i in rest])
                         newitems.append(item)
                     npath["items"] = newitems
-                if npath["type"] in ("f", "s", "fs"):
-                    for k, v in allkeys:
-                        npath[k] = npath.get(k, v)
+                if npath["type"] in ("f", "s"):
+                    for k in allkeys:
+                        npath[k] = npath.get(k)
                 val[i] = npath
             return val
 
